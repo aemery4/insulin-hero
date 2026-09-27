@@ -3,9 +3,10 @@
  */
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
 import type { Reading, Settings } from '../domain/types';
+import type { GameProgress } from '../game/progress';
 
 export const DB_NAME = 'insulin-hero';
-export const DB_VERSION = 1;
+export const DB_VERSION = 2;
 export const DEFAULT_PERSON_ID = 'me';
 
 export interface AppDB extends DBSchema {
@@ -17,6 +18,11 @@ export interface AppDB extends DBSchema {
   settings: {
     key: string;
     value: Settings;
+  };
+  /** Game saves (v2). Never contains readings. */
+  progress: {
+    key: string;
+    value: GameProgress;
   };
 }
 
@@ -30,6 +36,9 @@ export function openAppDb(name: string = DB_NAME): Promise<AppDatabase> {
         const readings = db.createObjectStore('readings', { keyPath: 'id' });
         readings.createIndex('by-person-time', ['personId', 'timestamp']);
         db.createObjectStore('settings');
+      }
+      if (oldVersion < 2) {
+        db.createObjectStore('progress');
       }
     },
   });

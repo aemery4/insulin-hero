@@ -3,6 +3,7 @@
  * opens a backup file — there is no network involved.
  */
 import type { Reading, Settings } from '../domain/types';
+import { withProgressDefaults, type GameProgress } from '../game/progress';
 import type { AppDatabase } from './db';
 import { withDefaults } from './settingsRepo';
 
@@ -15,15 +16,18 @@ export interface BackupFile {
   exportedAt: string;
   settings: Settings;
   readings: Reading[];
+  /** Game saves (optional; older backups don't have it). */
+  game?: GameProgress;
 }
 
 export class BackupError extends Error {}
 
 export async function exportBackup(db: AppDatabase, now = new Date()): Promise<BackupFile> {
-  const tx = db.transaction(['readings', 'settings']);
-  const [readings, settings] = await Promise.all([
+  const tx = db.transaction(['readings', 'settings', 'progress']);
+  const [readings, settings, game] = await Promise.all([
     tx.objectStore('readings').getAll(),
     tx.objectStore('settings').get('app'),
+    tx.objectStore('progress').get('game'),
   ]);
   await tx.done;
   return {
@@ -32,6 +36,7 @@ export async function exportBackup(db: AppDatabase, now = new Date()): Promise<B
     exportedAt: now.toISOString(),
     settings: withDefaults(settings),
     readings: readings.sort((a, b) => a.timestamp - b.timestamp),
+    game: withProgressDefaults(game),
   };
 }
 
@@ -71,20 +76,24 @@ export function parseBackup(text: string): BackupFile {
     exportedAt: String(data.exportedAt ?? ''),
     settings: withDefaults(isObj(data.settings) ? (data.settings as Partial<Settings>) : undefined),
     readings: data.readings as Reading[],
+    game: isObj(data.game) ? withProgressDefaults(data.game as Partial<GameProgress>) : undefined,
   };
 }
 
 /**
- * `merge` keeps existing readings and adds/overwrites by id.
- * `replace` wipes readings and settings first.
+ * `merge` keeps existing readings and adds/overwrites by id; settings and game saves stay as they are.
+ * `replace` wipes readings, settings, and game saves first.
  */
 export async function importBackup(db: AppDatabase, backup: BackupFile, mode: 'merge' | 'replace'): Promise<number> {
-  const tx = db.transaction(['readings', 'settings'], 'readwrite');
+  const tx = db.transaction(['readings', 'settings', 'progress'], 'readwrite');
   const readings = tx.objectStore('readings');
   const settings = tx.objectStore('settings');
   if (mode === 'replace') {
     await readings.clear();
     await settings.put(backup.settings, 'app');
+    const progress = tx.objectStore('progress');
+    await progress.clear();
+    if (backup.game) await progress.put(backup.game, 'game');
   }
   for (const r of backup.readings) await readings.put(r);
   await tx.done;

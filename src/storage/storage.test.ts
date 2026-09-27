@@ -1,7 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { Reading } from '../domain/types';
 import { BackupError, exportBackup, importBackup, parseBackup } from './backup';
+import { EMPTY_PROGRESS, recordResult } from '../game/progress';
 import { openAppDb, type AppDatabase } from './db';
+import { createProgressRepo } from './progressRepo';
 import { createReadingsRepo, type NewReading } from './readingsRepo';
 import { createSettingsRepo, DEFAULT_SETTINGS } from './settingsRepo';
 
@@ -100,7 +102,62 @@ describe('settings repo', () => {
   });
 });
 
+describe('schema upgrade v1 → v2', () => {
+  it('keeps existing readings and adds the game progress store', async () => {
+    const name = `${dbName}-upgrade`;
+    // Build a v1 database by hand, as the first release created it.
+    await new Promise<void>((resolve, reject) => {
+      const req = indexedDB.open(name, 1);
+      req.onupgradeneeded = () => {
+        const d = req.result;
+        const s = d.createObjectStore('readings', { keyPath: 'id' });
+        s.createIndex('by-person-time', ['personId', 'timestamp']);
+        d.createObjectStore('settings');
+        s.put({ id: 'old', personId: 'me', timestamp: T0, mgdl: 111, insulinGiven: false, carbsEaten: false, source: 'manual' });
+      };
+      req.onsuccess = () => {
+        req.result.close();
+        resolve();
+      };
+      req.onerror = () => reject(req.error);
+    });
+
+    const upgraded = await openAppDb(name);
+    expect(upgraded.version).toBe(2);
+    expect((await createReadingsRepo(upgraded).list()).map((r) => r.mgdl)).toEqual([111]);
+    const progress = createProgressRepo(upgraded);
+    expect((await progress.get()).missions).toEqual({});
+    upgraded.close();
+    indexedDB.deleteDatabase(name);
+  });
+});
+
+describe('progress repo', () => {
+  it('saves and loads game progress', async () => {
+    const repo = createProgressRepo(db);
+    const p = recordResult(EMPTY_PROGRESS, 'm1-1', 5000, 2);
+    await repo.save(p);
+    expect(await repo.get()).toEqual(p);
+  });
+});
+
 describe('backup', () => {
+  it('includes game progress and restores it on replace', async () => {
+    await createProgressRepo(db).save(recordResult(EMPTY_PROGRESS, 'm1-1', 7000, 2));
+    const file = JSON.stringify(await exportBackup(db));
+    const otherName = `${dbName}-game`;
+    const other = await openAppDb(otherName);
+    await importBackup(other, parseBackup(file), 'replace');
+    expect((await createProgressRepo(other).get()).missions['m1-1']?.stars).toBe(2);
+    other.close();
+    indexedDB.deleteDatabase(otherName);
+  });
+
+  it('accepts older backups without game progress', () => {
+    const old = JSON.stringify({ format: 'insulin-hero-backup', version: 1, readings: [] });
+    expect(parseBackup(old).game).toBeUndefined();
+  });
+
   async function seed() {
     const repo = createReadingsRepo(db);
     await repo.add(newReading(150, 10));

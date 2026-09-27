@@ -55,6 +55,7 @@ export function BackupPanel({ storage, onDataChanged }: Props) {
     if (!window.confirm('Delete ALL readings and settings on this device? This cannot be undone.')) return;
     await storage.readings.clear();
     await storage.db.clear('settings');
+    await storage.db.clear('progress');
     await onDataChanged();
     setMessage('All data on this device was deleted.');
   }
