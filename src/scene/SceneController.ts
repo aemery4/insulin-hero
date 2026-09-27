@@ -14,13 +14,12 @@ export interface SceneUpdate {
 
 /** Owns the Pixi application; React only calls `update`. */
 export class SceneController {
-  readonly model = new SceneModel(Date.now() & 0xffff);
   private lastKey: string | null = null;
 
   private constructor(
     private app: Application,
     private view: PixiRenderer,
-    private host: HTMLElement,
+    readonly model: SceneModel,
   ) {}
 
   static async create(host: HTMLElement, hero: HeroSettings = DEFAULT_SETTINGS.hero): Promise<SceneController> {
@@ -36,9 +35,9 @@ export class SceneController {
     app.canvas.setAttribute('aria-hidden', 'true');
     host.appendChild(app.canvas);
 
-    const controller = new SceneController(app, null as unknown as PixiRenderer, host);
-    const view = new PixiRenderer(app.renderer, controller.model, hero);
-    controller.view = view;
+    const model = new SceneModel(Date.now() & 0xffff);
+    const view = new PixiRenderer(app.renderer, model, hero);
+    const controller = new SceneController(app, view, model);
     app.stage.addChild(view.root);
     view.layout(app.screen.width, app.screen.height);
     app.renderer.on('resize', (w: number, h: number) => view.layout(w, h));
@@ -93,7 +92,7 @@ export class SceneController {
 
   destroy() {
     this.view.destroy();
+    // removeView detaches only this app's canvas; another controller may share the host.
     this.app.destroy({ removeView: true }, { children: true });
-    this.host.replaceChildren();
   }
 }

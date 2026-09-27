@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { deriveSceneState } from '../domain/sceneState';
 import type { SceneInput } from '../domain/types';
-import { MAX_GLUCOSE, SceneModel } from './SceneModel';
+import { MAX_GLUCOSE, SceneModel, WORLD } from './SceneModel';
 
 const RANGE = { low: 70, high: 180 };
 const state = (mgdl: number, extra: Partial<SceneInput> = {}) =>
@@ -103,6 +103,27 @@ describe('SceneModel event animations', () => {
     const s = m.snapshot();
     expect(s.helpers).toEqual([]);
     expect(Math.abs(s.glucose.count - s.glucose.target)).toBeLessThanOrEqual(4);
+  });
+
+  it('going from HIGH to a LOW with fast sugar drains the old glucose even while the helper works', () => {
+    const m = new SceneModel(11);
+    m.apply(state(300), { replay: true });
+    run(m, 3);
+    m.apply(state(55, { carbsEaten: true }), { replay: true });
+    run(m, 4);
+    const s = m.snapshot();
+    expect(s.helpers).toEqual(['fastSugar']);
+    expect(s.glucose.count - s.glucose.bonus).toBeLessThanOrEqual(s.glucose.target + 6);
+  });
+
+  it('a big jump up fills in across the vessel instead of in one clump', () => {
+    const m = new SceneModel(12);
+    m.apply(state(60), { replay: true });
+    run(m, 2);
+    m.apply(state(300), { replay: true });
+    run(m, 1);
+    const xs = m.particles.filter((p) => p.mode === 'flow').map((p) => p.x);
+    expect(xs.filter((x) => x > WORLD.w / 2).length).toBeGreaterThan(xs.length / 4);
   });
 
   it('food helper appears when carbs are logged outside a low', () => {

@@ -4,6 +4,7 @@ import { deriveSceneState, toSceneInput } from '../../domain/sceneState';
 import type { Reading, Settings } from '../../domain/types';
 import { SceneCanvas } from '../../scene/SceneCanvas';
 import { ReplayIcon } from '../components/Icons';
+import { SceneLegend } from '../components/SceneLegend';
 import { ZoneBadge } from '../components/ZoneBadge';
 import { formatDateTime, timeAgo } from '../format';
 
@@ -49,6 +50,8 @@ export function SceneView({ latest, settings, reducedMotion }: Props) {
         playKey={`${latest?.id ?? 'none'}:${replay}`}
         reducedMotion={reducedMotion}
       />
+
+      <SceneLegend hero={settings.hero} />
 
       <div className="explain" aria-live="polite">
         <p>{ZONE_EXPLANATION[scene.zone]}</p>

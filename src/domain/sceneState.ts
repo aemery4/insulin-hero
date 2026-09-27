@@ -28,7 +28,8 @@ export function toSceneInput(reading: Pick<Reading, 'mgdl' | 'insulinGiven' | 'c
 /** 0..1 visual crowding of the bloodstream, relative to the family's range. */
 export function glucoseLevelFor(mgdl: number, range: TargetRange): number {
   const { low, high } = range;
-  if (mgdl < low) return clamp(LOW_EDGE * (mgdl / low), MIN_LEVEL, LOW_EDGE);
+  // Squared so lows look noticeably sparse; still meets the in-range band at `low`.
+  if (mgdl < low) return clamp(LOW_EDGE * (mgdl / low) ** 2, MIN_LEVEL, LOW_EDGE);
   if (mgdl > high) return clamp(HIGH_EDGE + (1 - HIGH_EDGE) * ((mgdl - high) / high), HIGH_EDGE, 1);
   const t = high === low ? 0.5 : (mgdl - low) / (high - low);
   return LOW_EDGE + (HIGH_EDGE - LOW_EDGE) * t;

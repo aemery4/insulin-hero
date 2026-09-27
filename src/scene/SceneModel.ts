@@ -352,18 +352,23 @@ export class SceneModel {
     const target = this.targetGlucose;
     const helperBusy = this.helpers.length > 0;
     const inBlood = this.particles.filter((p) => p.mode === 'flow');
-    const normal = inBlood.filter((p) => !p.bonus).length;
+    const normal = inBlood.filter((p) => !p.bonus);
 
-    // Refill toward the target from the left edge of the vessel.
-    if (normal < target && this.rng.next() < 0.5) this.spawn(-6);
+    // Refill toward the target: small gaps from the left edge, big jumps fade in
+    // across the vessel so they don't arrive as one clump.
+    const deficit = target - normal.length;
+    if (deficit > 6) this.spawn(this.rng.range(0, WORLD.w)).alpha = 0.01;
+    else if (deficit > 0 && this.rng.next() < 0.5) this.spawn(-6);
 
     // Too much glucose for this reading: extra goes into open cells, or fades.
-    const extra = inBlood.length - target;
-    if (extra > 0 && !helperBusy && this.rng.next() < 0.25) {
-      const candidates = inBlood.filter((p) => p.bonus);
-      const p = (candidates.length ? candidates : inBlood)[0]!;
-      const open = this.openCells();
-      const c = this.rng.pick(open);
+    // Bonus glucose from a helper burst is kept until the helper is done.
+    const extraNormal = normal.length - target;
+    const extraTotal = inBlood.length - target;
+    const trimPool = extraNormal > 0 ? normal : !helperBusy && extraTotal > 0 ? inBlood.filter((p) => p.bonus) : [];
+    const trimRate = extraNormal > 12 ? 0.6 : 0.25;
+    if (trimPool.length && this.rng.next() < trimRate) {
+      const p = trimPool[0]!;
+      const c = this.rng.pick(this.openCells());
       if (c) this.sendToCell(p, c);
       else p.mode = 'fadeOut';
     }
@@ -395,6 +400,7 @@ export class SceneModel {
     for (const p of this.particles) {
       switch (p.mode) {
         case 'flow':
+          if (p.alpha < 1) p.alpha = Math.min(1, p.alpha + dt * 1.5);
           p.x += p.speed * m * dt;
           p.baseY = approach(p.baseY, Math.min(VESSEL.bottom - 8, Math.max(VESSEL.top + 8, p.baseY)), 30, dt);
           p.y = approach(p.y, p.baseY + Math.sin(p.phase + this.time * 1.6) * 5, 60, dt);

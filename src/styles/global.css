@@ -423,6 +423,41 @@ input[aria-invalid='true'] {
   color: var(--text-muted);
 }
 
+.legend {
+  margin-top: 10px;
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 0 14px;
+}
+
+.legend summary {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.legend ul {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.legend-note {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
 .explain {
   margin-top: 14px;
   font-size: 1.05rem;
