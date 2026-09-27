@@ -1,9 +1,10 @@
 import type { ComponentType, SVGProps } from 'react';
 import type { Route } from '../router';
-import { ChartIcon, GearIcon, PlusIcon, SceneIcon } from './Icons';
+import { ChartIcon, GearIcon, PlayIcon, PlusIcon, SceneIcon } from './Icons';
 
 const TABS: { route: Route; label: string; href: string; Icon: ComponentType<SVGProps<SVGSVGElement>> }[] = [
   { route: 'scene', label: 'Body', href: '#/', Icon: SceneIcon },
+  { route: 'play', label: 'Play', href: '#/play', Icon: PlayIcon },
   { route: 'log', label: 'Add', href: '#/log', Icon: PlusIcon },
   { route: 'history', label: 'History', href: '#/history', Icon: ChartIcon },
   { route: 'settings', label: 'Settings', href: '#/settings', Icon: GearIcon },

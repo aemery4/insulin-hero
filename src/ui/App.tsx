@@ -1,5 +1,6 @@
 import { useEffect, useRef, useSyncExternalStore } from 'react';
 import type { Settings } from '../domain/types';
+import { PlayView } from '../game/ui/PlayView';
 import { getStorage, type Storage } from '../storage';
 import { requestPersistentStorage } from '../storage/db';
 import { Disclaimer } from './components/Disclaimer';
@@ -69,6 +70,7 @@ export function App({ open = getStorage }: { open?: () => Promise<Storage> }) {
             {route === 'scene' && (
               <SceneView latest={data.readings.at(-1) ?? null} settings={data.settings} reducedMotion={reducedMotion} />
             )}
+            {route === 'play' && <PlayView storage={storage} settings={data.settings} calm={reducedMotion} />}
             {route === 'log' && (
               <LogEntryView
                 onSave={async (r) => {

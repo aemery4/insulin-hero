@@ -24,7 +24,13 @@ export const SceneIcon = (p: SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
-export const PlusIcon = (p: SVGProps<SVGSVGElement>) => (
+export const PlayIcon = (p: SVGProps<SVGSVGElement>) => (
+  <svg {...base(p)}>
+    <path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z" />
+  </svg>
+);
+
+export const PlusIcon =(p: SVGProps<SVGSVGElement>) => (
   <svg {...base(p)}>
     <circle cx="12" cy="12" r="9" />
     <path d="M12 8v8M8 12h8" />
