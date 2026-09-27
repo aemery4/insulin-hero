@@ -1,5 +1,6 @@
 import { zoneFor } from '../../domain/sceneState';
 import type { Reading, Settings } from '../../domain/types';
+import { LineChart } from '../chart/LineChart';
 import { ZoneBadge } from '../components/ZoneBadge';
 import { formatDay, formatTime } from '../format';
 
@@ -22,6 +23,8 @@ export function HistoryView({ readings, settings, onDelete }: Props) {
   return (
     <section className="view" aria-labelledby="history-heading">
       <h2 id="history-heading">History</h2>
+      <LineChart readings={readings} range={settings.range} />
+      <h3 className="list-heading">All readings</h3>
       {readings.length === 0 ? (
         <p className="empty">No readings yet. Tap Add to log one.</p>
       ) : (
