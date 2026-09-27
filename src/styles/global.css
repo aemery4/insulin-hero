@@ -405,6 +405,11 @@ input[aria-invalid='true'] {
   background: radial-gradient(ellipse at center, #5a1830 0%, #2b0b1a 100%);
 }
 
+.scene-host {
+  position: absolute;
+  inset: 0;
+}
+
 .scene-stage canvas {
   display: block;
   width: 100%;

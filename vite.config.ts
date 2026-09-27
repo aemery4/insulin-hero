@@ -1,6 +1,7 @@
 /// <reference types="vitest/config" />
 import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
+import { capturePlugin } from './tools/capture-plugin';
 
 // Strict Content Security Policy for production builds. Everything is served from
 // our own origin; no third-party network access is possible. (Omitted in dev
@@ -31,7 +32,7 @@ function cspPlugin(): Plugin {
 
 export default defineConfig({
   base: '/insulin-hero/',
-  plugins: [react(), cspPlugin()],
+  plugins: [react(), cspPlugin(), capturePlugin()],
   test: {
     // Pure logic runs in node; UI tests opt in with `// @vitest-environment jsdom`.
     environment: 'node',
