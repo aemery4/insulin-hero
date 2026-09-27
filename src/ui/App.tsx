@@ -1,4 +1,4 @@
-import { useEffect, useSyncExternalStore } from 'react';
+import { useEffect, useRef, useSyncExternalStore } from 'react';
 import type { Settings } from '../domain/types';
 import { getStorage, type Storage } from '../storage';
 import { requestPersistentStorage } from '../storage/db';
@@ -37,9 +37,18 @@ export function App({ open = getStorage }: { open?: () => Promise<Storage> }) {
     void requestPersistentStorage();
   }, []);
 
+  // On screen changes, move focus to the new heading so screen readers announce it.
+  const firstRoute = useRef(true);
   useEffect(() => {
     window.scrollTo?.(0, 0);
-  }, [route]);
+    if (firstRoute.current) {
+      firstRoute.current = false;
+      return;
+    }
+    const heading = document.querySelector<HTMLElement>('.app-main h2');
+    heading?.setAttribute('tabindex', '-1');
+    heading?.focus({ preventScroll: true });
+  }, [route, data.status]);
 
   return (
     <div className="app">

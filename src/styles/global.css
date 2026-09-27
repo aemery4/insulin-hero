@@ -97,6 +97,10 @@ a {
   padding: 16px;
 }
 
+.view h2:focus {
+  outline: none;
+}
+
 .view h2 {
   font-size: 1.5rem;
 }

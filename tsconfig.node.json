@@ -11,5 +11,5 @@
     "skipLibCheck": true,
     "noEmit": true
   },
-  "include": ["vite.config.ts", "tools"]
+  "include": ["vite.config.ts", "tools/capture-plugin.ts"]
 }
