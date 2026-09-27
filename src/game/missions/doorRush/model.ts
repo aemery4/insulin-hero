@@ -212,6 +212,12 @@ export class DoorRushModel implements MissionModel {
         n++;
       }
     }
+    // Never leave every locked door shut for long: bring the next one forward.
+    const locked = this.districts.filter((d) => d.hasLock);
+    if (!locked.some((d) => d.open)) {
+      const next = locked.reduce((a, b) => (a.timer < b.timer ? a : b));
+      next.timer = Math.min(next.timer, 0.5);
+    }
     this.powerSum += (n ? sum / n : 1) * dt;
     this.powerTime += dt;
   }

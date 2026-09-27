@@ -89,6 +89,19 @@ describe('DoorRushModel', () => {
     expect(Number(r.stats.find((s) => s.label === 'Filtered by the kidney')!.value)).toBeGreaterThan(CFG.kidneyCapacity);
   });
 
+  it('a locked door is never shut everywhere for more than about half a second', () => {
+    const m = new DoorRushModel(CFG, 7);
+    skipCountdown(m);
+    let closedFor = 0;
+    let worst = 0;
+    for (let i = 0; i < 40 * FPS; i++) {
+      m.step(DT);
+      closedFor = m.districts.some((d) => d.hasLock && d.open) ? 0 : closedFor + DT / 1000;
+      worst = Math.max(worst, closedFor);
+    }
+    expect(worst).toBeLessThanOrEqual(0.55);
+  });
+
   it('doors open and close over time', () => {
     const m = new DoorRushModel(CFG, 6);
     skipCountdown(m);

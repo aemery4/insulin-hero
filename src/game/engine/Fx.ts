@@ -45,6 +45,7 @@ export class Fx {
     s.anchor.set(0.5);
     s.alpha = 1;
     s.rotation = 0;
+    s.tint = 0xffffff; // pooled sprites keep old tints otherwise
     s.blendMode = 'add';
     this.layer.addChild(s);
     return s;
