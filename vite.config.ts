@@ -33,7 +33,8 @@ export default defineConfig({
   base: '/insulin-hero/',
   plugins: [react(), cspPlugin()],
   test: {
-    environment: 'jsdom',
+    // Pure logic runs in node; UI tests opt in with `// @vitest-environment jsdom`.
+    environment: 'node',
     setupFiles: ['./src/test/setup.ts'],
     css: false,
   },
