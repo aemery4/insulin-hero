@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Reading } from '../../domain/types';
-import { buildChart, inWindow, scaleLinear, yDomain, yTicks, zoneCounts, type Box } from './chartMath';
+import { buildChart, inWindow, plural, scaleLinear, yDomain, yTicks, zoneCounts, type Box } from './chartMath';
 
 const NOW = Date.UTC(2026, 8, 27, 12);
 const H = 3600_000;
@@ -59,6 +59,17 @@ describe('chartMath', () => {
     const b = buildChart([], { low: 90, high: 150 }, 24 * H, NOW, BOX);
     expect(b.band.bottom).toBeLessThan(a.band.bottom);
     expect(b.band.top).toBeGreaterThan(a.band.top);
+  });
+
+  it('keeps a reading taken right now fully inside the plot (not clipped at the edge)', () => {
+    const c = buildChart([reading(250, 0)], RANGE, 24 * H, NOW, BOX);
+    expect(c.points[0]!.x).toBeLessThanOrEqual(BOX.width - BOX.right - 6);
+  });
+
+  it('pluralizes', () => {
+    expect(plural(1, 'reading')).toBe('1 reading');
+    expect(plural(0, 'reading')).toBe('0 readings');
+    expect(plural(2, 'reading')).toBe('2 readings');
   });
 
   it('zoneCounts tallies zones', () => {

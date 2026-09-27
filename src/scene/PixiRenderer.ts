@@ -143,8 +143,11 @@ export class PixiRenderer {
     g.ellipse(KIDNEY.x - 12, KIDNEY.y + 2, 12, 12).fill({ color: 0xffffff, alpha: 0.08 });
     const label = new Text({ text: 'Kidney', style: LABEL_STYLE });
     label.anchor.set(0.5);
-    label.position.set(KIDNEY.x, KIDNEY.y + 6);
-    this.background.addChild(g, label);
+    label.position.set(KIDNEY.x, KIDNEY.y + 2);
+    const role = new Text({ text: 'filter', style: { ...LABEL_STYLE, fontSize: 11, fontWeight: '700' } });
+    role.anchor.set(0.5);
+    role.position.set(KIDNEY.x, KIDNEY.y + 16);
+    this.background.addChild(g, label, role);
   }
 
   private createBloodCells() {
@@ -207,6 +210,7 @@ export class PixiRenderer {
     lock.visible = c.hasLock;
 
     root.addChild(glow, body, dim, face, label, lock);
+    if (!c.hasLock) root.addChild(noKeyTag(top ? c.r + 9 : -c.r - 9));
     this.cellLayer.addChild(root);
     return { glow, dim, face, lock, shackle, expression: null };
   }
@@ -332,4 +336,18 @@ export class PixiRenderer {
     this.textures.hero?.destroy(true);
     this.root.destroy({ children: true });
   }
+}
+
+/** Pill shown on cells that take in glucose without insulin (the brain). */
+function noKeyTag(y: number): Container {
+  const tag = new Container();
+  const text = new Text({
+    text: 'No key needed',
+    style: { fontFamily: 'system-ui, sans-serif', fontSize: 10, fontWeight: '800', fill: INK },
+  });
+  text.anchor.set(0.5);
+  const w = text.width + 12;
+  tag.addChild(new Graphics().roundRect(-w / 2, -8, w, 16, 8).fill(0xfff1a8), text);
+  tag.position.set(0, y);
+  return tag;
 }

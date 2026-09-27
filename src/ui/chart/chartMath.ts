@@ -8,6 +8,10 @@ export const WINDOWS = {
 } as const;
 export type WindowKey = keyof typeof WINDOWS;
 
+const POINT_INSET = 9;
+
+export const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
+
 export interface Box {
   width: number;
   height: number;
@@ -54,7 +58,8 @@ export function scaleLinear([d0, d1]: [number, number], [r0, r1]: [number, numbe
 export function buildChart(readings: Reading[], range: TargetRange, windowMs: number, now: number, box: Box) {
   const visible = inWindow(readings, windowMs, now).sort((a, b) => a.timestamp - b.timestamp);
   const domain = yDomain(visible, range);
-  const x = scaleLinear([now - windowMs, now], [box.left, box.width - box.right]);
+  // Inset so markers at the very start/end of the window aren't cut off.
+  const x = scaleLinear([now - windowMs, now], [box.left + POINT_INSET, box.width - box.right - POINT_INSET]);
   const y = scaleLinear(domain, [box.height - box.bottom, box.top]);
   const points: ChartPoint[] = visible.map((r) => ({
     id: r.id,

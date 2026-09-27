@@ -20,7 +20,14 @@ export function SceneLegend({ hero }: { hero: HeroSettings }) {
         ))}
         <li>
           <span className="legend-note">
-            Brain cells can take in glucose without a key, so they have no lock.
+            <strong>Brain — no key needed:</strong> brain cells take in glucose without insulin, so they have no
+            lock.
+          </span>
+        </li>
+        <li>
+          <span className="legend-note">
+            <strong>Kidney — the filter:</strong> kidneys clean the blood. When there&apos;s too much glucose, the
+            extra spills out in pee. That&apos;s why high blood sugar can make you pee a lot and feel thirsty.
           </span>
         </li>
       </ul>

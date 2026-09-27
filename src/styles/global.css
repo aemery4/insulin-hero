@@ -29,10 +29,22 @@
   box-sizing: border-box;
 }
 
+/*
+ * App-shell layout: the page itself never scrolls; only .app-main does. This
+ * keeps the header and tab bar in place on iOS Safari, which can leave
+ * fixed/sticky elements shifted after the on-screen keyboard closes.
+ */
+html,
+body,
+#root {
+  height: 100%;
+}
+
 body {
   margin: 0;
   background: var(--bg);
-  min-height: 100dvh;
+  overflow: hidden;
+  overscroll-behavior: none;
 }
 
 h1,
@@ -68,13 +80,13 @@ a {
 .app {
   max-width: 720px;
   margin: 0 auto;
-  padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 16px);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .app-header {
-  position: sticky;
-  top: 0;
-  z-index: 5;
+  flex: none;
   background: var(--bg);
   padding: calc(env(safe-area-inset-top) + 10px) 16px 8px;
   border-bottom: 1px solid var(--border);
@@ -94,7 +106,12 @@ a {
 }
 
 .app-main {
-  padding: 16px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 16px 16px 24px;
 }
 
 .view h2:focus {
@@ -113,11 +130,7 @@ a {
 /* ---------- Tab bar ---------- */
 
 .tab-bar {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 10;
+  flex: none;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   background: var(--surface);

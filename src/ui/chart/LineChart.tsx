@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Reading, TargetRange, Zone } from '../../domain/types';
 import { formatDateTime } from '../format';
-import { buildChart, WINDOWS, zoneCounts, type Box, type ChartPoint, type WindowKey } from './chartMath';
+import { buildChart, plural, WINDOWS, zoneCounts, type Box, type ChartPoint, type WindowKey } from './chartMath';
 
 interface Props {
   readings: Reading[];
@@ -66,7 +66,7 @@ export function LineChart({ readings, range, now: nowProp }: Props) {
   const summary =
     chart.points.length === 0
       ? `No readings in the last ${WINDOWS[windowKey].label}.`
-      : `Last ${WINDOWS[windowKey].label}: ${chart.points.length} readings — ${counts.inRange} in range, ${counts.high} high, ${counts.low} low. Target range ${range.low} to ${range.high}.`;
+      : `Last ${WINDOWS[windowKey].label}: ${plural(chart.points.length, 'reading')} — ${counts.inRange} in range, ${counts.high} high, ${counts.low} low. Target range ${range.low} to ${range.high}.`;
   const path = chart.points.map((p, i) => `${i ? 'L' : 'M'}${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ');
 
   return (

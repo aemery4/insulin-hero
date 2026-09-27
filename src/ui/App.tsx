@@ -40,7 +40,7 @@ export function App({ open = getStorage }: { open?: () => Promise<Storage> }) {
   // On screen changes, move focus to the new heading so screen readers announce it.
   const firstRoute = useRef(true);
   useEffect(() => {
-    window.scrollTo?.(0, 0);
+    document.querySelector('.app-main')?.scrollTo?.(0, 0);
     if (firstRoute.current) {
       firstRoute.current = false;
       return;
@@ -73,6 +73,8 @@ export function App({ open = getStorage }: { open?: () => Promise<Storage> }) {
               <LogEntryView
                 onSave={async (r) => {
                   await addReading(r);
+                  // Close the phone keyboard before switching screens.
+                  (document.activeElement as HTMLElement | null)?.blur?.();
                   navigate('scene');
                 }}
               />
