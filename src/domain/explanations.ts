@@ -35,17 +35,23 @@ export const ZONE_EXPLANATION: Record<SceneState['zone'], string> = {
   none: "Add a reading to see what's happening inside the body.",
 };
 
-/** What each simulator button does in the example body. Describes; never instructs. */
-export function actionExplanation(action: SimAction, heroName: string): string {
-  const hero = heroName.trim() || 'Insulin Hero';
-  if (action.type === 'insulin') return `${hero} and friends are on their way with keys. Insulin works slowly: about 3–4 hours here.`;
-  if (action.kind === 'fastSugar') return 'Fast sugar gets into the blood really quickly. Watch the number turn around in minutes.';
-  if (action.kind === 'meal') return 'A meal turns into glucose over the next hour or so, so the number climbs.';
-  return 'A snack turns into glucose, and the number starts to climb within minutes.';
+/** One short line for what each simulator button does. Describes; never instructs. */
+export function actionExplanation(action: SimAction): string {
+  if (action.type === 'insulin') return 'Keys on the way! Insulin works slowly — hours.';
+  if (action.kind === 'fastSugar') return 'Fast sugar: glucose rises in minutes.';
+  if (action.kind === 'meal') return 'Meal → glucose over the next hour.';
+  return 'Snack → glucose within minutes.';
 }
 
-export const HIGH_WITH_INSULIN =
-  'Lots of glucose is in the blood, and insulin heroes are unlocking the cells. As glucose moves inside, the number comes down — slowly.';
+/** One short line per zone for the simulator screen. */
+export const ZONE_SHORT: Record<SceneState['zone'], string> = {
+  high: 'Lots of glucose, but the cells are locked and hungry.',
+  inRange: 'Just right — cells unlocked and full of energy.',
+  low: 'Not much glucose left — cells are running low.',
+  none: '',
+};
+
+export const HIGH_WITH_INSULIN = 'Insulin is unlocking the cells — glucose is moving in.';
 
 export const SIM_NOTE =
   'Example body with made-up numbers. Real bodies are all different — real amounts and timing come from the care team.';

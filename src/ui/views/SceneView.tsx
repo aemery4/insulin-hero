@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useSyncExternalStore } from 'react';
-import { actionExplanation, HIGH_WITH_INSULIN, SIM_NOTE, ZONE_EXPLANATION } from '../../domain/explanations';
+import { actionExplanation, HIGH_WITH_INSULIN, SIM_NOTE, ZONE_SHORT } from '../../domain/explanations';
 import { simSceneState } from '../../domain/sceneState';
 import {
   formatBodyTime,
@@ -80,10 +80,10 @@ export function SceneView({ settings, reducedMotion, store = simStore }: Props) 
 
   const recentAction = sim.last && sim.minutes - sim.last.at < ACTION_NOTE_MINUTES ? sim.last.action : null;
   const explanation = recentAction
-    ? actionExplanation(recentAction, settings.hero.name)
+    ? actionExplanation(recentAction)
     : scene.zone === 'high' && working.insulin
       ? HIGH_WITH_INSULIN
-      : ZONE_EXPLANATION[scene.zone];
+      : ZONE_SHORT[scene.zone];
 
   return (
     <>

@@ -56,7 +56,7 @@ describe('App', () => {
     const user = userEvent.setup();
     render(<App open={open} />);
     await user.click(await screen.findByRole('button', { name: /Big insulin/ }));
-    expect(screen.getByText(/on their way with keys/)).toBeInTheDocument();
+    expect(screen.getByText(/Keys on the way/)).toBeInTheDocument();
     expect(screen.getByText(/Insulin working/)).toBeInTheDocument();
     bodyTime(60);
     expect(Number(document.querySelector('.mgdl')!.textContent)).toBeLessThan(START_MGDL - 10);

@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { actionExplanation, DISCLAIMER, eventExplanation, ZONE_EXPLANATION } from './explanations';
+import {
+  actionExplanation,
+  DISCLAIMER,
+  eventExplanation,
+  HIGH_WITH_INSULIN,
+  ZONE_EXPLANATION,
+  ZONE_SHORT,
+} from './explanations';
 
 describe('DISCLAIMER', () => {
   it('uses the configured name', () => {
@@ -25,6 +32,19 @@ describe('explanation copy', () => {
     }
   });
 
+  it('simulator lines are short (fit one line on a phone)', () => {
+    const lines = [
+      ...Object.values(ZONE_SHORT),
+      HIGH_WITH_INSULIN,
+      actionExplanation({ type: 'insulin', size: 'big' }),
+      actionExplanation({ type: 'food', kind: 'fastSugar' }),
+      actionExplanation({ type: 'food', kind: 'meal' }),
+      actionExplanation({ type: 'food', kind: 'snack' }),
+    ];
+    for (const l of lines) expect(l.length, l).toBeLessThanOrEqual(62);
+    for (const l of lines) expect(l).not.toMatch(/\b(units?|grams?|carbs?|should|need to|take|give|dose)\b/i);
+  });
+
   it('simulator copy never shows amounts or instructions', () => {
     const actions = [
       { type: 'insulin', size: 'small' },
@@ -34,7 +54,7 @@ describe('explanation copy', () => {
       { type: 'food', kind: 'fastSugar' },
     ] as const;
     for (const a of actions) {
-      const text = actionExplanation(a, 'Hero');
+      const text = actionExplanation(a);
       expect(text).not.toMatch(/\b(units?|grams?|carbs?|should|need to|take|give|dose)\b/i);
     }
   });
