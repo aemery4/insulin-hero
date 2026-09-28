@@ -126,6 +126,16 @@ describe('SceneModel event animations', () => {
     expect(xs.filter((x) => x > WORLD.w / 2).length).toBeGreaterThan(xs.length / 4);
   });
 
+  it('food eaten while insulin is still working keeps the unlocked doors open', () => {
+    const m = new SceneModel(13);
+    m.apply(state(250, { insulinGiven: true }), { replay: true });
+    run(m, 15);
+    // later: still high, insulin still working, a snack arrives (no new heroes)
+    const s = { ...state(240, { insulinGiven: true }), events: ['foodGlucose' as const] };
+    m.apply(s, { replay: true });
+    expect(lockable(m).every((c) => !c.locked)).toBe(true);
+  });
+
   it('food helper appears when carbs are logged outside a low', () => {
     const m = new SceneModel(8);
     m.apply(state(130, { carbsEaten: true }), { replay: true });

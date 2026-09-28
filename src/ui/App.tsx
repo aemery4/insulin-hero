@@ -5,10 +5,8 @@ import { getStorage, type Storage } from '../storage';
 import { requestPersistentStorage } from '../storage/db';
 import { Disclaimer } from './components/Disclaimer';
 import { TabBar } from './components/TabBar';
-import { navigate, useRoute } from './router';
+import { useRoute } from './router';
 import { useAppData } from './useAppData';
-import { HistoryView } from './views/HistoryView';
-import { LogEntryView } from './views/LogEntryView';
 import { SceneView } from './views/SceneView';
 import { SettingsView } from './views/SettingsView';
 
@@ -30,7 +28,7 @@ function useReducedMotion(pref: Settings['reducedMotion'] | undefined): boolean 
 
 export function App({ open = getStorage }: { open?: () => Promise<Storage> }) {
   const route = useRoute();
-  const { data, storage, addReading, removeReading, saveSettings, refresh } = useAppData(open);
+  const { data, storage, saveSettings, refresh } = useAppData(open);
   const settings = data.status === 'ready' ? data.settings : undefined;
   const reducedMotion = useReducedMotion(settings?.reducedMotion);
 
@@ -67,23 +65,8 @@ export function App({ open = getStorage }: { open?: () => Promise<Storage> }) {
         )}
         {data.status === 'ready' && (
           <>
-            {route === 'scene' && (
-              <SceneView latest={data.readings.at(-1) ?? null} settings={data.settings} reducedMotion={reducedMotion} />
-            )}
+            {route === 'scene' && <SceneView settings={data.settings} reducedMotion={reducedMotion} />}
             {route === 'play' && <PlayView storage={storage} settings={data.settings} calm={reducedMotion} />}
-            {route === 'log' && (
-              <LogEntryView
-                onSave={async (r) => {
-                  await addReading(r);
-                  // Close the phone keyboard before switching screens.
-                  (document.activeElement as HTMLElement | null)?.blur?.();
-                  navigate('scene');
-                }}
-              />
-            )}
-            {route === 'history' && (
-              <HistoryView readings={data.readings} settings={data.settings} onDelete={removeReading} />
-            )}
             {route === 'settings' && (
               <SettingsView
                 key={JSON.stringify(data.settings)}

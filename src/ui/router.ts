@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
 // Hash routing works on GitHub Pages without any 404.html fallback.
-export const ROUTES = ['scene', 'play', 'log', 'history', 'settings'] as const;
+export const ROUTES = ['scene', 'play', 'settings'] as const;
 export type Route = (typeof ROUTES)[number];
 
 export function parseRoute(hash: string): Route {

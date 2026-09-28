@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DISCLAIMER, eventExplanation, ZONE_EXPLANATION } from './explanations';
+import { actionExplanation, DISCLAIMER, eventExplanation, ZONE_EXPLANATION } from './explanations';
 
 describe('DISCLAIMER', () => {
   it('uses the configured name', () => {
@@ -22,6 +22,20 @@ describe('explanation copy', () => {
   it('event explanations contain no treatment instructions', () => {
     for (const e of ['insulinHeroes', 'fastSugarHelper', 'foodGlucose'] as const) {
       expect(eventExplanation(e, 'Hero')).not.toMatch(ADVICE);
+    }
+  });
+
+  it('simulator copy never shows amounts or instructions', () => {
+    const actions = [
+      { type: 'insulin', size: 'small' },
+      { type: 'insulin', size: 'big' },
+      { type: 'food', kind: 'snack' },
+      { type: 'food', kind: 'meal' },
+      { type: 'food', kind: 'fastSugar' },
+    ] as const;
+    for (const a of actions) {
+      const text = actionExplanation(a, 'Hero');
+      expect(text).not.toMatch(/\b(units?|grams?|carbs?|should|need to|take|give|dose)\b/i);
     }
   });
 

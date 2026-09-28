@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { deriveSceneState, EMPTY_SCENE, glucoseLevelFor, toSceneInput, zoneFor } from './sceneState';
+import { deriveSceneState, EMPTY_SCENE, glucoseLevelFor, simSceneState, toSceneInput, zoneFor } from './sceneState';
 import type { SceneInput, TargetRange } from './types';
 
 const DEFAULT: TargetRange = { low: 70, high: 180 };
@@ -99,6 +99,20 @@ describe('deriveSceneState', () => {
 
   it('never shows the fast-sugar helper unless carbs were logged', () => {
     expect(deriveSceneState(input(50), DEFAULT).events).not.toContain('fastSugarHelper');
+  });
+});
+
+describe('simSceneState', () => {
+  it('plays the animation for the last button pressed', () => {
+    expect(simSceneState(200, DEFAULT, { insulin: true, food: false }, { type: 'insulin', size: 'small' }).events).toEqual(['insulinHeroes']);
+    expect(simSceneState(60, DEFAULT, { insulin: false, food: true }, { type: 'food', kind: 'fastSugar' }).events).toEqual(['fastSugarHelper']);
+    expect(simSceneState(120, DEFAULT, { insulin: false, food: true }, { type: 'food', kind: 'meal' }).events).toEqual(['foodGlucose']);
+    expect(simSceneState(120, DEFAULT, { insulin: false, food: false }, null).events).toEqual([]);
+  });
+
+  it('high with insulin still working → heroes opening the locks', () => {
+    expect(simSceneState(220, DEFAULT, { insulin: true, food: false }, null).locks).toBe('opening');
+    expect(simSceneState(220, DEFAULT, { insulin: false, food: false }, null).locks).toBe('closed');
   });
 });
 

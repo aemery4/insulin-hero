@@ -5,6 +5,7 @@
  * looks and how brightly cells glow. It does not — and must never — calculate,
  * recommend, or suggest insulin doses, carb amounts, or treatment decisions.
  */
+import type { SimAction } from './simulator';
 import type { Reading, SceneInput, SceneState, TargetRange, Zone } from './types';
 
 /** Visual density bands: the in-range band sits in the middle third. */
@@ -43,6 +44,28 @@ export const EMPTY_SCENE: SceneState = {
   kidneySpill: false,
   events: [],
 };
+
+/**
+ * Scene for the example-body simulator: the zone comes from the simulated
+ * glucose; locks open while insulin is still working; the one-shot animation
+ * matches the last button pressed.
+ */
+export function simSceneState(
+  mgdl: number,
+  range: TargetRange,
+  working: { insulin: boolean; food: boolean },
+  last: SimAction | null,
+): SceneState {
+  const base = deriveSceneState({ mgdl, insulinGiven: working.insulin, carbsEaten: false }, range);
+  const events: SceneState['events'] = !last
+    ? []
+    : last.type === 'insulin'
+      ? ['insulinHeroes']
+      : last.kind === 'fastSugar'
+        ? ['fastSugarHelper']
+        : ['foodGlucose'];
+  return { ...base, events };
+}
 
 export function deriveSceneState(input: SceneInput | null, range: TargetRange): SceneState {
   if (!input) return EMPTY_SCENE;

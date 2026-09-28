@@ -1,20 +1,18 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { Reading, Settings } from '../domain/types';
+import type { Settings } from '../domain/types';
 import type { Storage } from '../storage';
-import type { NewReading } from '../storage/readingsRepo';
 
 export type AppData =
   | { status: 'loading' }
   | { status: 'error'; message: string }
-  | { status: 'ready'; settings: Settings; readings: Reading[] };
+  | { status: 'ready'; settings: Settings };
 
 export function useAppData(openStorage: () => Promise<Storage>) {
   const [storage, setStorage] = useState<Storage | null>(null);
   const [data, setData] = useState<AppData>({ status: 'loading' });
 
   const reload = useCallback(async (s: Storage) => {
-    const [settings, readings] = await Promise.all([s.settings.get(), s.readings.list()]);
-    setData({ status: 'ready', settings, readings });
+    setData({ status: 'ready', settings: await s.settings.get() });
   }, []);
 
   useEffect(() => {
@@ -37,25 +35,6 @@ export function useAppData(openStorage: () => Promise<Storage>) {
     };
   }, [openStorage, reload]);
 
-  const addReading = useCallback(
-    async (r: NewReading) => {
-      if (!storage) return null;
-      const saved = await storage.readings.add(r);
-      await reload(storage);
-      return saved;
-    },
-    [storage, reload],
-  );
-
-  const removeReading = useCallback(
-    async (id: string) => {
-      if (!storage) return;
-      await storage.readings.remove(id);
-      await reload(storage);
-    },
-    [storage, reload],
-  );
-
   const saveSettings = useCallback(
     async (settings: Settings) => {
       if (!storage) return;
@@ -69,5 +48,5 @@ export function useAppData(openStorage: () => Promise<Storage>) {
     if (storage) await reload(storage);
   }, [storage, reload]);
 
-  return { data, storage, addReading, removeReading, saveSettings, refresh };
+  return { data, storage, saveSettings, refresh };
 }

@@ -154,7 +154,8 @@ export class SceneModel {
     if (opts.replay) {
       this.heroes = [];
       this.helpers = [];
-      this.unlockedByHero.clear();
+      // Only a new hero delivery re-locks cells for the heroes to open again.
+      if (state.events.includes('insulinHeroes')) this.unlockedByHero.clear();
       for (const p of this.particles) p.bonus = false;
       this.startEvents(state.events);
     }
@@ -166,7 +167,7 @@ export class SceneModel {
       if (!c.hasLock) continue;
       if (this.state.locks === 'open' || this.state.zone === 'none') c.locked = this.state.locks !== 'open';
       else if (this.state.locks === 'closed') c.locked = true;
-      else if (replay) c.locked = true; // 'opening': heroes will unlock on arrival
+      else if (replay && this.state.events.includes('insulinHeroes')) c.locked = true; // heroes unlock on arrival
       else c.locked = !this.unlockedByHero.has(c.kind);
     }
   }

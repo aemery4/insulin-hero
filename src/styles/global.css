@@ -132,7 +132,7 @@ a {
 .tab-bar {
   flex: none;
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   background: var(--surface);
   border-top: 1px solid var(--border);
   padding-bottom: env(safe-area-inset-bottom);
@@ -496,6 +496,165 @@ input[aria-invalid='true'] {
   flex-wrap: wrap;
   gap: 10px;
   margin-top: 12px;
+}
+
+/* ---------- Simulator ---------- */
+
+.sim-title {
+  margin: 0;
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #ffd23f;
+}
+
+.sim-note {
+  margin: 2px 0 8px;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: var(--text-muted);
+}
+
+.trend {
+  font-size: 2rem;
+  font-weight: 900;
+  margin-left: 4px;
+}
+
+.working-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.chip {
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-muted);
+}
+
+.chip-insulin {
+  background: rgba(95, 180, 255, 0.18);
+  color: #bfe0ff;
+}
+
+.chip-food {
+  background: rgba(255, 181, 71, 0.18);
+  color: #ffe0b0;
+}
+
+.sim-controls {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.control-group {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 10px 10px;
+  margin: 0;
+}
+
+.control-group legend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 6px;
+  font-weight: 800;
+}
+
+.control-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.ctl {
+  min-height: 64px;
+  border-radius: 14px;
+  border: 2px solid transparent;
+  font: inherit;
+  font-weight: 800;
+  font-size: 0.95rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  cursor: pointer;
+  color: #11142b;
+  transition: transform 0.08s;
+}
+
+.ctl > span[aria-hidden] {
+  font-size: 1.4rem;
+  line-height: 1.1;
+}
+
+.ctl:active {
+  transform: scale(0.95);
+}
+
+.ctl-insulin {
+  background: #7cc4ff;
+}
+
+.ctl-food {
+  background: #ffc978;
+}
+
+.sim-chart {
+  margin-top: 12px;
+  width: 100%;
+  background: var(--surface);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.sim-chart svg {
+  display: block;
+}
+
+.sim-chart .band {
+  fill: var(--zone-in);
+  opacity: 0.16;
+}
+
+.sim-chart .grid {
+  stroke: var(--border);
+}
+
+.sim-chart .axis {
+  fill: var(--text-muted);
+  font-size: 11px;
+}
+
+.sim-chart .line {
+  fill: none;
+  stroke: #fff3b0;
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+}
+
+.sim-chart .now-dot {
+  fill: #fff3b0;
+  stroke: var(--surface);
+  stroke-width: 2;
+}
+
+.sim-chart .mark-line {
+  stroke: var(--text-muted);
+  stroke-dasharray: 3 3;
+  opacity: 0.5;
+}
+
+.sim-chart .mark {
+  font-size: 12px;
 }
 
 /* ---------- Chart ---------- */

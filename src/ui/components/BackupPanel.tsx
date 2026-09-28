@@ -24,7 +24,7 @@ export function BackupPanel({ storage, onDataChanged }: Props) {
     if (!storage) return;
     const backup = await exportBackup(storage.db);
     saveFile(`insulin-hero-backup-${backup.exportedAt.slice(0, 10)}.json`, JSON.stringify(backup, null, 2));
-    setMessage(`Saved a backup with ${backup.readings.length} readings.`);
+    setMessage('Saved a backup of game progress and settings.');
   }
 
   async function chooseFile(e: ChangeEvent<HTMLInputElement>) {
@@ -40,19 +40,17 @@ export function BackupPanel({ storage, onDataChanged }: Props) {
     }
   }
 
-  async function restore(mode: 'merge' | 'replace') {
+  async function restore() {
     if (!storage || !pending) return;
-    if (mode === 'replace' && !window.confirm('Replace ALL readings and settings on this device with the backup?'))
-      return;
-    const count = await importBackup(storage.db, pending, mode);
+    await importBackup(storage.db, pending, 'replace');
     setPending(null);
     await onDataChanged();
-    setMessage(`Restored ${count} readings.`);
+    setMessage('Restored game progress and settings.');
   }
 
   async function deleteAll() {
     if (!storage) return;
-    if (!window.confirm('Delete ALL readings and settings on this device? This cannot be undone.')) return;
+    if (!window.confirm('Delete ALL game progress and settings on this device? This cannot be undone.')) return;
     await storage.readings.clear();
     await storage.db.clear('settings');
     await storage.db.clear('progress');
@@ -64,8 +62,8 @@ export function BackupPanel({ storage, onDataChanged }: Props) {
     <section className="panel" aria-labelledby="backup-heading">
       <h3 id="backup-heading">Backup</h3>
       <p className="hint">
-        Readings are only stored on this device. Save a backup file now and then so they aren&apos;t lost if the phone
-        is lost or reset.
+        Game progress (stars, story) and settings are only stored on this device. Save a backup file to move them to
+        another phone or keep them safe.
       </p>
       <div className="button-stack">
         <button type="button" className="btn btn-secondary" onClick={doExport} disabled={!storage}>
@@ -79,15 +77,10 @@ export function BackupPanel({ storage, onDataChanged }: Props) {
 
       {pending && (
         <div className="confirm-box">
-          <p>
-            This backup has <strong>{pending.readings.length}</strong> readings. How should it be restored?
-          </p>
+          <p>Restore game progress and settings from this backup? It replaces what&apos;s on this device now.</p>
           <div className="button-stack">
-            <button type="button" className="btn btn-primary" onClick={() => restore('merge')}>
-              Add to what&apos;s here
-            </button>
-            <button type="button" className="btn btn-secondary" onClick={() => restore('replace')}>
-              Replace everything
+            <button type="button" className="btn btn-primary" onClick={restore}>
+              Restore
             </button>
             <button type="button" className="btn btn-ghost" onClick={() => setPending(null)}>
               Cancel
