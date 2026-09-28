@@ -12,9 +12,10 @@ interface Props {
 }
 
 const WINDOW = 4 * 60; // body-minutes shown
-const H = 150;
-const M = { left: 34, right: 10, top: 8, bottom: 22 };
+const H = 84;
+const M = { left: 30, right: 8, top: 6, bottom: 18 };
 const Y: [number, number] = [40, 300];
+const TICKS = [100, 200, 300];
 
 /** Small "last 4 hours" graph of the example body, with button presses marked. */
 export function SimChart({ history, events, now, range }: Props) {
@@ -40,7 +41,7 @@ export function SimChart({ history, events, now, range }: Props) {
     <div ref={ref} className="sim-chart">
       <svg width={width} height={H} role="img" aria-label="Graph of the example body's glucose over the last few hours">
         <rect className="band" x={M.left} y={y(range.high)} width={width - M.left - M.right} height={y(range.low) - y(range.high)} />
-        {[50, 100, 150, 200, 250, 300].map((v) => (
+        {TICKS.map((v) => (
           <g key={v}>
             <line className="grid" x1={M.left} x2={width - M.right} y1={y(v)} y2={y(v)} />
             <text className="axis" x={M.left - 5} y={y(v) + 4} textAnchor="end">
@@ -49,7 +50,7 @@ export function SimChart({ history, events, now, range }: Props) {
           </g>
         ))}
         {marks.map((e) => (
-          <g key={e.id} transform={`translate(${x(e.at)}, ${H - M.bottom + 12})`}>
+          <g key={e.id} transform={`translate(${x(e.at)}, ${H - M.bottom + 13})`}>
             <line className="mark-line" x1={0} x2={0} y1={-(H - M.bottom - M.top) - 12} y2={-12} />
             <text className="mark" textAnchor="middle">
               {e.action.type === 'insulin' ? '🔑' : e.action.kind === 'fastSugar' ? '🧃' : e.action.kind === 'meal' ? '🍝' : '🍎'}

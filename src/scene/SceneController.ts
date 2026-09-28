@@ -32,6 +32,10 @@ export class SceneController {
       resolution: Math.min(window.devicePixelRatio || 1, 2),
       preference: 'webgl',
     });
+    // The Body scene is look-only. Detach Pixi's pointer handling so it doesn't set
+    // touch-action:none or swallow touches — swiping on the animation scrolls the page.
+    app.renderer.events.setTargetElement(null as unknown as HTMLElement);
+    app.canvas.style.touchAction = 'pan-y pinch-zoom';
     app.canvas.setAttribute('aria-hidden', 'true');
     host.appendChild(app.canvas);
 
@@ -45,8 +49,16 @@ export class SceneController {
       controller.model.step(t.deltaMS);
       view.sync(controller.model);
     });
+    // resizeTo only reacts to window resizes; also follow the host box itself
+    // (flex layouts change its size without the window changing).
+    if (typeof ResizeObserver !== 'undefined') {
+      controller.resizeObserver = new ResizeObserver(() => app.resize());
+      controller.resizeObserver.observe(host);
+    }
     return controller;
   }
+
+  private resizeObserver: ResizeObserver | null = null;
 
   update({ state, playKey, hero, reducedMotion }: SceneUpdate) {
     const replay = playKey !== this.lastKey;
@@ -91,6 +103,7 @@ export class SceneController {
   }
 
   destroy() {
+    this.resizeObserver?.disconnect();
     this.view.destroy();
     // removeView detaches only this app's canvas; another controller may share the host.
     this.app.destroy({ removeView: true }, { children: true });

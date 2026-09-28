@@ -54,6 +54,13 @@ const FOOD_BUTTONS: { kind: 'snack' | 'meal' | 'fastSugar'; label: string; icon:
   { kind: 'fastSugar', label: 'Fast sugar', icon: '🧃' },
 ];
 
+/** How long (body-minutes) the "what that button did" line stays up. */
+const ACTION_NOTE_MINUTES = 45;
+
+/**
+ * The example-body simulator. Laid out to fit one phone screen: status on top,
+ * the animation filling the middle, and the buttons at the bottom within thumb reach.
+ */
 export function SceneView({ settings, reducedMotion, store = simStore }: Props) {
   const sim = useSyncExternalStore(store.subscribe, store.getSnapshot);
   useSimClock(store);
@@ -71,37 +78,81 @@ export function SceneView({ settings, reducedMotion, store = simStore }: Props) 
   const give = (a: SimAction) => store.give(a);
   const heroImg = svgDataUrl(heroSvg(settings.hero.bodyColor, settings.hero.capeColor));
 
+  const recentAction = sim.last && sim.minutes - sim.last.at < ACTION_NOTE_MINUTES ? sim.last.action : null;
+  const explanation = recentAction
+    ? actionExplanation(recentAction, settings.hero.name)
+    : scene.zone === 'high' && working.insulin
+      ? HIGH_WITH_INSULIN
+      : ZONE_EXPLANATION[scene.zone];
+
   return (
-    <section className="view scene-view" aria-labelledby="scene-heading">
-      <h2 id="scene-heading" className="sim-title">
-        Example body
-      </h2>
-      <p className="sim-note">{SIM_NOTE}</p>
+    <>
+      <section className="view sim-screen" aria-labelledby="scene-heading">
+        <h2 id="scene-heading" className="visually-hidden">
+          Example body
+        </h2>
 
-      <div className="reading-card">
-        <div className="reading-number" aria-live="polite" aria-atomic="true">
-          <span className="mgdl">{display}</span>
-          <span className="unit">mg/dL</span>
-          <span className="trend" aria-label={TREND_WORDS[trend]} title={TREND_WORDS[trend]}>
-            {TREND_ARROW[trend]}
-          </span>
+        <div className="sim-status">
+          <div className="reading-number" aria-live="polite" aria-atomic="true">
+            <span className="mgdl">{display}</span>
+            <span className="unit">mg/dL</span>
+            <span className="trend" aria-label={TREND_WORDS[trend]} title={TREND_WORDS[trend]}>
+              {TREND_ARROW[trend]}
+            </span>
+          </div>
+          <ZoneBadge zone={scene.zone} size="sm" />
         </div>
-        <ZoneBadge zone={scene.zone} />
-        <p className="reading-time">
-          Body time: {formatBodyTime(sim.minutes)} · {TREND_WORDS[trend]}
-          {sim.speed === 3 ? ' · fast-forward' : ''}
-          {!sim.running ? ' · paused' : ''}
-        </p>
-      </div>
+        <div className="sim-subrow">
+          <p className="sim-clock">
+            Body time {formatBodyTime(sim.minutes)} · {TREND_WORDS[trend]}
+            {sim.speed === 3 ? ' · fast' : ''}
+            {!sim.running ? ' · paused' : ''}
+          </p>
+          <div className="sim-tools">
+            <button type="button" className="tool" aria-label={sim.running ? 'Pause' : 'Play'} onClick={() => store.setRunning(!sim.running)}>
+              {sim.running ? '❚❚' : '▶'}
+            </button>
+            <button
+              type="button"
+              className="tool"
+              aria-label="Fast-forward"
+              aria-pressed={sim.speed === 3}
+              onClick={() => store.setSpeed(sim.speed === 3 ? 1 : 3)}
+            >
+              ⏩
+            </button>
+            <button type="button" className="tool" aria-label="Start over" onClick={() => store.reset()}>
+              ↺
+            </button>
+          </div>
+        </div>
 
-      <SceneCanvas state={scene} hero={settings.hero} playKey={String(sim.last?.id ?? 'none')} reducedMotion={reducedMotion} />
+        <SceneCanvas
+          className="fill"
+          state={scene}
+          hero={settings.hero}
+          playKey={String(sim.last?.id ?? 'none')}
+          reducedMotion={reducedMotion}
+        />
 
-      <div className="sim-controls">
-        <fieldset className="control-group">
-          <legend>
-            <img src={heroImg} width={28} height={28} alt="" /> Insulin
-          </legend>
-          <div className="control-row">
+        <SimChart history={sim.history} events={sim.events} now={sim.minutes} range={settings.range} />
+
+        <div className="sim-explain" aria-live="polite">
+          <p>{explanation}</p>
+          <div className="working-chips">
+            {working.insulin && (
+              <span className="chip chip-insulin">🔑 Insulin working · {formatBodyTime(working.insulinMinutesLeft)} left</span>
+            )}
+            {working.food && <span className="chip chip-food">🍽 Food turning into glucose</span>}
+            {!working.insulin && !working.food && <span className="chip">Nothing working — steady</span>}
+          </div>
+        </div>
+
+        <div className="sim-controls">
+          <div className="control-row" role="group" aria-label="Insulin">
+            <span className="row-label" aria-hidden="true">
+              <img src={heroImg} width={26} height={26} alt="" />
+            </span>
             {INSULIN_BUTTONS.map((b) => (
               <button
                 key={b.size}
@@ -115,10 +166,10 @@ export function SceneView({ settings, reducedMotion, store = simStore }: Props) 
               </button>
             ))}
           </div>
-        </fieldset>
-        <fieldset className="control-group">
-          <legend>🍽 Food</legend>
-          <div className="control-row">
+          <div className="control-row" role="group" aria-label="Food">
+            <span className="row-label" aria-hidden="true">
+              🍽
+            </span>
             {FOOD_BUTTONS.map((b) => (
               <button key={b.kind} type="button" className="ctl ctl-food" onClick={() => give({ type: 'food', kind: b.kind })}>
                 <span aria-hidden="true">{b.icon}</span>
@@ -126,37 +177,14 @@ export function SceneView({ settings, reducedMotion, store = simStore }: Props) 
               </button>
             ))}
           </div>
-        </fieldset>
+        </div>
+
+        <p className="sim-note">{SIM_NOTE}</p>
+      </section>
+
+      <div className="view below-fold">
+        <SceneLegend hero={settings.hero} />
       </div>
-
-      <div className="working-chips" aria-live="polite">
-        {working.insulin && (
-          <span className="chip chip-insulin">🔑 Insulin working · about {formatBodyTime(working.insulinMinutesLeft)} left</span>
-        )}
-        {working.food && <span className="chip chip-food">🍽 Food turning into glucose</span>}
-        {!working.insulin && !working.food && <span className="chip">Nothing working right now — steady</span>}
-      </div>
-
-      <div className="explain" aria-live="polite">
-        {sim.last && <p className="explain-event">{actionExplanation(sim.last.action, settings.hero.name)}</p>}
-        <p>{scene.zone === 'high' && working.insulin ? HIGH_WITH_INSULIN : ZONE_EXPLANATION[scene.zone]}</p>
-      </div>
-
-      <SimChart history={sim.history} events={sim.events} now={sim.minutes} range={settings.range} />
-
-      <div className="scene-actions">
-        <button type="button" className="btn btn-secondary" onClick={() => store.setRunning(!sim.running)}>
-          {sim.running ? '❚❚ Pause' : '▶ Play'}
-        </button>
-        <button type="button" className="btn btn-secondary" aria-pressed={sim.speed === 3} onClick={() => store.setSpeed(sim.speed === 3 ? 1 : 3)}>
-          ⏩ {sim.speed === 3 ? 'Normal speed' : 'Fast-forward'}
-        </button>
-        <button type="button" className="btn btn-ghost" onClick={() => store.reset()}>
-          ↺ Start over
-        </button>
-      </div>
-
-      <SceneLegend hero={settings.hero} />
-    </section>
+    </>
   );
 }

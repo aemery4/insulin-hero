@@ -38,12 +38,10 @@ export const ZONE_EXPLANATION: Record<SceneState['zone'], string> = {
 /** What each simulator button does in the example body. Describes; never instructs. */
 export function actionExplanation(action: SimAction, heroName: string): string {
   const hero = heroName.trim() || 'Insulin Hero';
-  if (action.type === 'insulin')
-    return `${hero} and friends are on their way with keys. Insulin works slowly — in this example body, over about 3 to 4 hours.`;
-  if (action.kind === 'fastSugar')
-    return 'Fast sugar gets into the blood really quickly — you’ll see the number turn around within minutes.';
-  if (action.kind === 'meal') return 'A meal is broken down into glucose over the next hour or so, so the number climbs.';
-  return 'A snack is broken down into glucose, and the number starts to climb within minutes.';
+  if (action.type === 'insulin') return `${hero} and friends are on their way with keys. Insulin works slowly: about 3–4 hours here.`;
+  if (action.kind === 'fastSugar') return 'Fast sugar gets into the blood really quickly. Watch the number turn around in minutes.';
+  if (action.kind === 'meal') return 'A meal turns into glucose over the next hour or so, so the number climbs.';
+  return 'A snack turns into glucose, and the number starts to climb within minutes.';
 }
 
 export const HIGH_WITH_INSULIN =

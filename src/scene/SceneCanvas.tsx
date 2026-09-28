@@ -8,6 +8,7 @@ interface Props {
   /** Changes whenever one-shot event animations should (re)play. */
   playKey: string;
   reducedMotion: boolean;
+  className?: string;
 }
 
 declare global {
@@ -19,7 +20,7 @@ declare global {
 
 const hasWebGL = () => typeof window !== 'undefined' && typeof window.WebGLRenderingContext !== 'undefined';
 
-export function SceneCanvas({ state, hero, playKey, reducedMotion }: Props) {
+export function SceneCanvas({ state, hero, playKey, reducedMotion, className = '' }: Props) {
   const hostRef = useRef<HTMLDivElement>(null);
   const controllerRef = useRef<SceneController | null>(null);
   const [ready, setReady] = useState(0);
@@ -56,7 +57,7 @@ export function SceneCanvas({ state, hero, playKey, reducedMotion }: Props) {
   }, [state, playKey, hero, reducedMotion, ready]);
 
   return (
-    <div className="scene-stage" data-zone={state.zone}>
+    <div className={`scene-stage ${className}`} data-zone={state.zone}>
       {failed ? (
         <div className="scene-placeholder">The animation can&apos;t run on this device, but the explanation below still works.</div>
       ) : (
