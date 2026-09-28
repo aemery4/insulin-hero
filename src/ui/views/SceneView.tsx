@@ -101,13 +101,6 @@ export function SceneView({ settings, reducedMotion, store = simStore }: Props) 
             </span>
           </div>
           <ZoneBadge zone={scene.zone} size="sm" />
-        </div>
-        <div className="sim-subrow">
-          <p className="sim-clock">
-            Body time {formatBodyTime(sim.minutes)} · {TREND_WORDS[trend]}
-            {sim.speed === 3 ? ' · fast' : ''}
-            {!sim.running ? ' · paused' : ''}
-          </p>
           <div className="sim-tools">
             <button type="button" className="tool" aria-label={sim.running ? 'Pause' : 'Play'} onClick={() => store.setRunning(!sim.running)}>
               {sim.running ? '❚❚' : '▶'}
@@ -127,24 +120,31 @@ export function SceneView({ settings, reducedMotion, store = simStore }: Props) 
           </div>
         </div>
 
-        <SceneCanvas
-          className="fill"
-          state={scene}
-          hero={settings.hero}
-          playKey={String(sim.last?.id ?? 'none')}
-          reducedMotion={reducedMotion}
-        />
+        <div className="scene-wrap">
+          <SceneCanvas
+            className="fill"
+            state={scene}
+            hero={settings.hero}
+            playKey={String(sim.last?.id ?? 'none')}
+            reducedMotion={reducedMotion}
+          />
+          <span className="scene-tag">Example body · made-up numbers</span>
+        </div>
 
         <SimChart history={sim.history} events={sim.events} now={sim.minutes} range={settings.range} />
 
         <div className="sim-explain" aria-live="polite">
           <p>{explanation}</p>
           <div className="working-chips">
+            <span className="chip">
+              ⏱ {formatBodyTime(sim.minutes)}
+              {sim.speed === 3 ? ' · fast' : ''}
+              {!sim.running ? ' · paused' : ''}
+            </span>
             {working.insulin && (
               <span className="chip chip-insulin">🔑 Insulin working · {formatBodyTime(working.insulinMinutesLeft)} left</span>
             )}
-            {working.food && <span className="chip chip-food">🍽 Food turning into glucose</span>}
-            {!working.insulin && !working.food && <span className="chip">Nothing working — steady</span>}
+            {working.food && <span className="chip chip-food">🍽 Digesting food</span>}
           </div>
         </div>
 
@@ -178,11 +178,10 @@ export function SceneView({ settings, reducedMotion, store = simStore }: Props) 
             ))}
           </div>
         </div>
-
-        <p className="sim-note">{SIM_NOTE}</p>
       </section>
 
       <div className="view below-fold">
+        <p className="sim-note">{SIM_NOTE}</p>
         <SceneLegend hero={settings.hero} />
       </div>
     </>

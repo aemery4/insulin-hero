@@ -12,10 +12,10 @@ interface Props {
 }
 
 const WINDOW = 4 * 60; // body-minutes shown
-const H = 84;
-const M = { left: 30, right: 8, top: 6, bottom: 18 };
+const H = 64;
+const M = { left: 30, right: 8, top: 5, bottom: 16 };
 const Y: [number, number] = [40, 300];
-const TICKS = [100, 200, 300];
+const TICKS = [100, 200];
 
 /** Small "last 4 hours" graph of the example body, with button presses marked. */
 export function SimChart({ history, events, now, range }: Props) {
@@ -50,7 +50,7 @@ export function SimChart({ history, events, now, range }: Props) {
           </g>
         ))}
         {marks.map((e) => (
-          <g key={e.id} transform={`translate(${x(e.at)}, ${H - M.bottom + 13})`}>
+          <g key={e.id} transform={`translate(${x(e.at)}, ${H - M.bottom + 12})`}>
             <line className="mark-line" x1={0} x2={0} y1={-(H - M.bottom - M.top) - 12} y2={-12} />
             <text className="mark" textAnchor="middle">
               {e.action.type === 'insulin' ? '🔑' : e.action.kind === 'fastSugar' ? '🧃' : e.action.kind === 'meal' ? '🍝' : '🍎'}
